@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>jquery.cselect</title>
+    <link href="demo.css" rel="stylesheet" type="text/css"/>
+    <script src="./jquery.1.9.0.js" type="text/javascript"></script>
+    <script src="../jquery.cselect.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("select").cselectCss();
+            $.fn.cselectCss.cEvent($('#test'), function (data) {
+                alert(data.value);
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="singlerow-select">
+    <select name="test" id="test">
+        <option value="o1">o1</option>
+        <option value="o2">o2</option>
+    </select>
+</div>
+</body>
+</html>
