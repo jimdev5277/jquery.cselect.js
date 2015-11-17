@@ -8,20 +8,50 @@
     <script src="./jquery.1.9.0.js" type="text/javascript"></script>
     <script src="../jquery.cselect.js" type="text/javascript"></script>
     <script type="text/javascript">
-        $(document).ready(function () {
-            $("select").cselectCss();
-            $.fn.cselectCss.cEvent($('#test'), function (data) {
-                alert(data.value);
+        function showMsg(obj) {
+            var opt = obj.options[obj.selectedIndex];
+            alert("The option you select is:" + opt.text + "(" + opt.value + ")");
+        }
+        function mychange() {
+            alert("我的值是：" + bObj.options[bObj.selectedIndex].value);
+        }
+        var bObj = document.getElementById("test2");
+        function addchange() {
+//            jquery方法
+            $('#test2').cselectCss();
+            $('#test2').change(function () {
+                alert("The option you select is:" + $(this).children('option:selected').val());
             });
+//            原生方法
+//            if(bObj.addEventListener){  // firefox  , w3c
+//                bObj.addEventListener("change",mychange,false);
+//            } else {   // ie
+//                bObj.attachEvent("onchange",mychange);
+//            }
+        }
+        $(document).ready(function () {
+            $('#test').cselectCss();
+            $('#test2').cselectCss();
         });
     </script>
 </head>
 <body>
 <div class="singlerow-select">
-    <select name="test" id="test">
+    <h3>在select html中写出onchange</h3>
+    <select name="test" id="test" onchange="showMsg(this)">
         <option value="o1">o1</option>
         <option value="o2">o2</option>
     </select>
+</div>
+<div class="singlerow-select">
+    <h3>在js中写出onchange</h3>
+    <select name="test2" id="test2">
+        <option value="o3">o3</option>
+        <option value="o4">o4</option>
+    </select>
+    <br>
+    <br>
+    <button onclick="addchange()">写入onchange事件</button>
 </div>
 </body>
 </html>

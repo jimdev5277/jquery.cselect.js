@@ -58,6 +58,14 @@
             _select.val(value);
             select_showbox.text(wenben).removeClass('active');
             ul_option.hide();
+            /*重新运行onchange事件*/
+            if(document.all){
+                select_container.fireEvent("onchange");
+            }else{
+                var evt = document.createEvent('HTMLEvents');
+                evt.initEvent('change',true,true);
+                select_container.dispatchEvent(evt);
+            }
         });
         $(document).bind("keyup", function (e) {//添加按下esc收起下拉列表
             var myEvent = e || window.event;
