@@ -16,9 +16,7 @@
         //创建select容器，class为select_box，插入到select标签前
         var tag_select = $('<div></div>');//div相当于select标签
         tag_select.attr('class', 'select_box  ' + singleClassName);
-        if (index == 1) {
-        }
-        tag_select.insertBefore(select_container);
+        tag_select.data('cselect-show', true).insertBefore(select_container);
 
 
         //显示框class为select_showbox,插入到创建的tag_select中
@@ -38,7 +36,8 @@
         } else if (tag_select.data('select-enable') == false) {
             $tag_select.data('select-enable', false);
         }
-        tag_select.on("click", function () {
+        tag_select.on("click", function (e) {
+            e.stopPropagation();
             if ($(this).data('select-enable')) {
                 clearOptionMethod(select_showbox, ul_option);
             }
@@ -59,11 +58,11 @@
             select_showbox.text(wenben).removeClass('active');
             ul_option.hide();
             /*重新运行onchange事件*/
-            if(document.all){
+            if (document.all) {
                 select_container.fireEvent("onchange");
-            }else{
+            } else {
                 var evt = document.createEvent('HTMLEvents');
-                evt.initEvent('change',true,true);
+                evt.initEvent('change', true, true);
                 select_container.dispatchEvent(evt);
             }
         });
@@ -75,7 +74,14 @@
                 select_showbox.removeClass('active');
             }
         });
+        $(document).on("click", function (e) {//添加点击其他区域隐藏下拉列表
+            if ($(e.target).data('cselect-show')) {
 
+            } else {
+                ul_option.hide();
+                select_showbox.removeClass('active');
+            }
+        });
         li_option.hover(function () {
             $(this).addClass('hover').siblings().removeClass('hover');
         }, function () {
@@ -110,25 +116,5 @@
             $(this).prev('.select_box').remove();//初始化移除之前存在的
             createSelect_cSelect(ele, i, singleClassName);
         });
-    };
-    /**
-     * 自定义事件
-     * @param ele 响应事件的元素
-     * @param event_  响应事件回调
-     */
-    $.fn.cselectCss.cEvent = function (ele, event_) {
-        var $ele = $(ele),
-            $option = $($(ele).prev('.select_box').find('.select_option'));
-        $option.on('click', 'li', function (e) {
-            var singrow_select_options = [];
-            singrow_select_options.indexid = $(this).index();
-            var value = $ele.find('option').eq(singrow_select_options.indexid).attr('value');
-            var text = $ele.find('option').eq(singrow_select_options.indexid).text();
-            singrow_select_options.value = value;
-            singrow_select_options.text = text;
-            e.stopPropagation();
-            return event_(singrow_select_options);
-        });
-
     };
 }(jQuery));
