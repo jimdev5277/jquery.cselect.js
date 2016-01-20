@@ -30,11 +30,11 @@
         ul_option.appendTo(tag_select);
         createOptions_cSelect(select_container, ul_option);//创建option
         /**增加模拟select是否起作用的控制**/
-        var $tag_select = $(tag_select);
-        if (tag_select.data('select-enable') == undefined || tag_select.data('select-enable') == null || tag_select.data('select-enable') == true) {
-            $tag_select.data('select-enable', true);
-        } else if (tag_select.data('select-enable') == false) {
+         var $tag_select = $(tag_select), $select_container = $(select_container);
+        if ($select_container.prop('disabled') == true || $select_container.data('select-enable') == false) {//读取属性为不能设置的就设置模拟select不能下拉
             $tag_select.data('select-enable', false);
+        } else if ($select_container.prop('disabled') == false || $select_container.data('select-enable') == true) {//读取真实的select设置模拟属性
+            $tag_select.data('select-enable', true);
         }
         tag_select.on("click", function (e) {
             e.stopPropagation();
