@@ -42,8 +42,10 @@
         var $tag_select = $(tag_select), $select_container = $(select_container);
         if ($select_container.prop('disabled') == true || $select_container.data('select-enable') == false) {//读取属性为不能设置的就设置模拟select不能下拉
             $tag_select.data('select-enable', false);
+            select_showbox.addClass('disabled');
         } else if ($select_container.prop('disabled') == false || $select_container.data('select-enable') == true) {//读取真实的select设置模拟属性
             $tag_select.data('select-enable', true);
+            select_showbox.removeClass('disabled');
         }
         tag_select.on("click", function () {
             if ($(this).data('select-enable')) {
