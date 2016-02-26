@@ -30,7 +30,9 @@
 //            }
         }
         $(document).ready(function () {
-            $('#test').cselectCss();
+            $('#test').cselectCss({
+                autocomplete:true
+            });
             $('#test2').cselectCss();
         });
     </script>
@@ -38,14 +40,27 @@
 <body>
 <div class="singlerow-select">
     <h3>在select html中写出onchange</h3>
-    <select name="test" id="test" onchange="showMsg(this)">
+    <select name="test" id="test" onchange="showMsg(this)" cselect-fixwidth="300">
         <option value="o1">o1</option>
         <option value="o2">o2</option>
+        <option value="o3">o3</option>
+        <option value="o4">o4</option>
+        <option value="o5">o5</option>
+        <option value="o7">o7</option>
+        <option value="o6">o6</option>
+        <option value="o8">o8</option>
+        <option value="o9">o9</option>
+        <option value="o11">o10</option>
+        <option value="ox">ox</option>
+        <option value="od">od</option>
+        <option value="odd">odfd</option>
+        <option value="or">ozzz</option>
+        <option value="zw">这是中文</option>
     </select>
 </div>
 <div class="singlerow-select">
     <h3>在js中写出onchange</h3>
-    <select name="test2" id="test2">
+    <select name="test2" id="test2" cselect-fixwidth="300">
         <option value="o3">o3</option>
         <option value="o4">o4</option>
     </select>

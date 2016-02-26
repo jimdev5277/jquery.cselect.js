@@ -59,11 +59,12 @@
             z-index: 1000;
             width: 100%;
             box-sizing: border-box;
+            border-bottom: 1px solid #d4d4d4;
         }
 
         .singlerow-select .select_option li {
             list-style: none;
-            height: 21px;
+            height: 32px;
             width: 55px;
             color: #868A92;
             font-size: 13px;
@@ -77,6 +78,10 @@
             overflow: hidden;
             border-bottom: 1px solid #d4d4d4;
             width: 100%;
+        }
+
+        .singlerow-select .select_option li.last-option{
+            border-bottom: none;
         }
 
         .singlerow-select .select_option li:hover {
