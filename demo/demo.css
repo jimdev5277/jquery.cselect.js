@@ -90,5 +90,10 @@
         }
 
         .singlerow-select .select_option li.selected {
+            color: whitesmoke;
+            background-color: #b3d6a9;
+        }
+
+        .singlerow-select .select_option li.selected {
             color: #868A92;
         }
