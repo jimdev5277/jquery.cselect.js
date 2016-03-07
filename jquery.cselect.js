@@ -31,7 +31,7 @@
             select_showbox.width(options.cfixwidth)
         }
         select_showbox.data('cselect-show', true).css('cursor', 'pointer').attr('class', 'select_showbox').appendTo(tag_select);
-        select_showbox.data('filter-text-color',select_showbox.css('color'));
+        select_showbox.data('filter-text-color', select_showbox.css('color'));
 
         //创建option容器，class为select_option，插入到创建的tag_select中
         var ul_option = $('<ul></ul>');//创建option列表
@@ -54,9 +54,9 @@
                     console.info("这是click");
                 }
             }
-        }).on('blur',function(){
-            if(options.autocomplete){
-                select_showbox.css('color',select_showbox.data('filter-text-color'));
+        }).on('blur', function () {
+            if (options.autocomplete) {
+                select_showbox.css('color', select_showbox.data('filter-text-color'));
                 console.info('showbox 失去焦点');
             }
         });
@@ -147,7 +147,7 @@
                 'box-sizing': 'border-box',
                 'position': 'absolute',
                 'left': 0,
-                'top':0,
+                'top': 0,
                 'padding-left': searchleft,
                 'border': 'none',
                 'outline': 'none',
@@ -156,18 +156,19 @@
             }).insertBefore(ul_list).bind('input propertychange', function () {
                 console.info("这是输入中");
                 if ($(this).val() != '') {
-                    select_showbox.css('color','transparent');
+                    select_showbox.css('color', 'transparent');
                     var searchval = $(this).val();
                     filterdo(ul_list, searchval);
                 } else {
                     filterdo(ul_list);
                 }
             }).on('blur', function () {
-                select_showbox.css('color',select_showbox.data('filter-text-color'));
+                select_showbox.css('color', select_showbox.data('filter-text-color'));
                 $(this).val('');
                 if (!ul_list.data('filter-ul-open')) {
                     clearOptionMethod(select_showbox, ul_list);
                     filterdo(ul_list);
+                    $downci.data('down-ci-show', false);
                 }
                 console.info("这是input 失去焦点");
             }).on('focus', function () {
@@ -177,6 +178,27 @@
                     filterdo(ul_list);
                 }
                 console.info("这是input focus");
+            });
+            var $downci = $('<i></i>');//右边小箭头控制显示与否
+            $downci.width(searchright).height(searchheight).data('down-ci-show', true).css({
+                'box-sizing': 'border-box',
+                'position': 'absolute',
+                'right': 0,
+                'top': 0,
+                'border': 'none',
+                'outline': 'none',
+                'background': 'transparent',
+                'line-height': searchheight + 'px',
+                'cursor': 'pointer'
+            }).insertBefore(ul_list).on('click', function (e) {
+                e.stopPropagation();
+                if (!ul_list.is('visible')) {
+                    if ($downci.data('down-ci-show')) {
+                        $searchinput.focus();
+                    } else {
+                        $downci.data('down-ci-show', true);
+                    }
+                }
             });
         }
     }
