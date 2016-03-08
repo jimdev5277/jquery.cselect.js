@@ -9,7 +9,16 @@
         select_showbox.hasClass('active') ? select_showbox.removeClass('active') : select_showbox.addClass('active');
         var opwidth = select_showbox.outerWidth();
         opwidth = opwidth - (ul_option.width(opwidth).outerWidth() - opwidth);//设置下拉框菜单与显示框长度一致
-        ul_option.width(opwidth).slideToggle(100).children('li').css('padding-right', ul_option[0].offsetWidth - ul_option[0].scrollWidth);//滚动条留白
+        ul_option.width(opwidth).slideToggle(100, function () {
+            if (ul_option.css('display') == 'none') {
+                ul_option.children('li').removeClass('selected').each(function () {
+                    if (select_showbox.text() == $(this).text()) {
+                        $(this).addClass('selected');
+                    }
+                });
+            }
+        }).data('seldefaultindex', -1).children('li').css('padding-right', ul_option[0].offsetWidth - ul_option[0].scrollWidth);//滚动条留白
+
     }
 
     function createSelect_cSelect(select_container, index, singleClassName, options) {
@@ -65,7 +74,11 @@
             e.stopPropagation();
         }).hover(function () {
             ul_option.data('filter-ul-open', true);
+            console.info('ul进入了');
         }, function () {
+
+            select_showbox.css('color', select_showbox.data('filter-text-color'));
+
             ul_option.data('filter-ul-open', false);
             console.info('ul离开了');
         });
@@ -94,6 +107,7 @@
             console.info("这是li得到焦点");
         }, function () {
             li_option.removeClass('hover');
+            console.info("这是li失去焦点");
         });
 
         $(document).bind("keyup", function (e) {//添加按下esc收起下拉列表
@@ -102,6 +116,53 @@
             if (keyCode == 27) {
                 ul_option.hide();
                 select_showbox.removeClass('active');
+            } else if (keyCode == 40) { //下移操作
+                if (ul_option.css("display") != 'none') {
+                    var seldefaultindex = ul_option.data('seldefaultindex');
+                    if (seldefaultindex < ul_option.children('li').length - 1) {
+                        seldefaultindex = seldefaultindex + 1;
+                    } else {
+                        seldefaultindex = ul_option.children('li').length - 1;
+                    }
+                    if (seldefaultindex == 0) {
+                        ul_option.scrollTop(0);
+                    } else {
+                        var liheight = seldefaultindex * ul_option.children('li').eq(0).outerHeight();
+                        var offsetTopHeight = liheight - ul_option.scrollTop();
+                        if (offsetTopHeight > ul_option.outerHeight() || offsetTopHeight < 0) {
+                            ul_option.scrollTop(liheight);
+                        }
+                    }
+                    ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').eq(seldefaultindex).addClass('selected');
+                }
+            } else if (keyCode == 38) { //上移操作
+                if (ul_option.css("display") != 'none') {
+                    var seldefaultindex = ul_option.data('seldefaultindex');
+                    if (seldefaultindex > 0) {
+                        seldefaultindex = seldefaultindex - 1;
+                    } else {
+                        seldefaultindex = 0;
+                    }
+                    if (seldefaultindex == 0) {
+                        ul_option.scrollTop(0);
+                    } else {
+                        var liheight = seldefaultindex * ul_option.children('li').eq(0).outerHeight();
+                        var offsetTopHeight = liheight - ul_option.scrollTop();
+                        if (offsetTopHeight > ul_option.outerHeight() || offsetTopHeight < 0) {
+                            ul_option.scrollTop(liheight);
+                        }
+                    }
+                    ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').eq(seldefaultindex).addClass('selected');
+                }
+            } else if (keyCode == 13) { //回车操作
+                if (ul_option.css("display") != 'none') {
+                    ul_option.children('li.selected').click();
+                    if (options.autocomplete) {
+                        ul_option.prev().prev('input').data('enter-operation', true);
+                        console.info('enter-operation', ul_option.prev().prev('input').data('enter-operation'));
+                        ul_option.prev().prev('input').blur();
+                    }
+                }
             }
         }).on("click", function (e) {//添加点击其他区域隐藏下拉列表
             if ($(e.target).data('cselect-show')) {
@@ -118,6 +179,8 @@
         var options = $select_container.children('option'),
             selected_option = options.filter(':selected'),
             selected_index = selected_option.index(),
+            selcurrentIndex = selected_index,
+            selindexArr = [],
             showbox = ul_list.prev();
         showbox.text(selected_option.text());
         //为每个option建立个li并赋值
@@ -125,12 +188,13 @@
             var tag_option = $('<li></li>'),//li相当于option
                 txt_option = options.eq(n).text();
             tag_option.text(txt_option).css('cursor', 'pointer').attr('title', txt_option).appendTo(ul_list);
+            selindexArr.push(n);
             //为被选中的元素添加class为selected
             if (n == selected_index) {
                 tag_option.attr('class', 'selected');
             }
         }
-        ul_list.css('max-height', parameters.maxheight + 'px').children('li:last').addClass('last-option');
+        ul_list.css('max-height', parameters.maxheight + 'px').children('li:last').addClass('last-option').data('selcurrentIndex', selcurrentIndex).data('selindexArr', selindexArr);
         searchFilter(ul_list, select_showbox, parameters);
     }
 
@@ -143,7 +207,9 @@
                 searchleft = parseInt(select_showbox.css('padding-left')),
                 searchright = parseInt(select_showbox.css('padding-right'));
             $searchinput = $('<input class="searchinput" type="text"/>');
-            $searchinput.data('cselect-show', true).width(searchwidth - searchright).height(searchheight).css({
+            $searchinput.data({
+                'cselect-show': true
+            }).width(searchwidth - searchright).height(searchheight).css({
                 'box-sizing': 'border-box',
                 'position': 'absolute',
                 'left': 0,
@@ -163,12 +229,16 @@
                     filterdo(ul_list);
                 }
             }).on('blur', function () {
-                select_showbox.css('color', select_showbox.data('filter-text-color'));
                 $(this).val('');
-                if (!ul_list.data('filter-ul-open')) {
-                    clearOptionMethod(select_showbox, ul_list);
-                    filterdo(ul_list);
-                    $downci.data('down-ci-show', false);
+                if (!$(this).data('enter-operation')) {
+                    if (!ul_list.data('filter-ul-open')) {
+                        clearOptionMethod(select_showbox, ul_list);
+                        filterdo(ul_list);
+                        $downci.data('down-ci-show', false);
+                        select_showbox.css('color', select_showbox.data('filter-text-color'));
+                    }
+                } else {
+                    $(this).data('enter-operation', false);
                 }
                 console.info("这是input 失去焦点");
             }).on('focus', function () {
@@ -208,14 +278,17 @@
             var inputval = arguments[1],
                 ulLength = ul_list.children('li').length,
                 i = 0;
-            arguments[0].children('li').each(function () {
+            var selindexArr = [];
+            arguments[0].children('li').each(function (index) {
                 if (($(this).text()).indexOf(inputval) >= 0) {
                     $(this).show();
+                    selindexArr.push(index);
                 } else {
                     $(this).hide();
                     i = i + 1;
                 }
             });
+            ul_list.data('selindexArr', selindexArr);
             console.info('结算结果为' + i);
             console.info('ul_list长度为' + ulLength);
             if (ulLength == i) {
