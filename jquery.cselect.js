@@ -82,6 +82,7 @@
         });
         var li_option = ul_option.find('li').not('.tip');
         li_option.on('click', function () {
+            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("jjjjj") : '';
             $(this).addClass('selected').siblings().removeClass('selected');
             var wenben = $(this).text();
             var index = $(this).index();
@@ -199,16 +200,29 @@
                 'background': 'transparent',
                 'line-height': searchheight + 'px'
             }).insertBefore(ul_list).bind('input propertychange', function () {
-                $(this).parent('.select_box').data('cselect-debug') ? console.info("这是输入中") : '';
-                if ($(this).val() != '') {
+                if(navigator.userAgent.indexOf("MSIE 8.0")>0){
+                    if(!$(this).data('cselect-ie8-blur')){
+                        $(this).parent('.select_box').data('cselect-debug') ? console.info("这是ie8输入中") : '';
+                        select_showbox.css('color', 'transparent');
+                        var searchval = $(this).val();
+                        filterdo(ul_list, searchval);
+                    }else{
+                        $(this).data('cselect-ie8-blur',false);
+                    }
+                }else{
+                    $(this).parent('.select_box').data('cselect-debug') ? console.info("这是输入中") : '';
                     select_showbox.css('color', 'transparent');
                     var searchval = $(this).val();
                     filterdo(ul_list, searchval);
-                } else {
-                    filterdo(ul_list);
                 }
             }).on('blur', function () {
-                $(this).val('');
+
+                if(navigator.userAgent.indexOf("MSIE 8.0")>0){
+                    $(this).parent('.select_box').data('cselect-debug') ?console.info("ie8 input 离开"):'';
+                    $(this).data('cselect-ie8-blur',true).val('');
+                }else{
+                    $(this).val('');
+                }
                 select_showbox.css('color', select_showbox.data('filter-text-color'));
                 if (!$(this).data('enter-operation')) {
                     if (!ul_list.data('filter-ul-open')) {
@@ -253,10 +267,10 @@
         }
     }
 
-    function filterdo(ul_list, searchval) {//执行关键词检索
-        if (arguments.length > 1) {
-            var inputval = arguments[1],
-                ulLength = ul_list.children('li').length,
+    function filterdo(ul_list) {//执行关键词检索
+        var inputval = ul_list.prev().prev('input').val();
+        if (inputval) {
+               var ulLength = ul_list.children('li').length,
                 i = 0;
             var selindexArr = [];
             arguments[0].children('li').each(function (index) {
@@ -269,8 +283,8 @@
                 }
             });
             ul_list.data('selindexArr', selindexArr);
-            ul_list.parent('.select_box').data('cselect-debug') ? console.info('结算结果为' + i) : '';
-            ul_list.parent('.select_box').data('cselect-debug') ? console.info('ul_list长度为' + ulLength) : '';
+            //ul_list.parent('.select_box').data('cselect-debug') ? console.info('结算结果为' + i) : '';
+            //ul_list.parent('.select_box').data('cselect-debug') ? console.info('ul_list长度为' + ulLength) : '';
             if (ulLength == i) {
                 var $noresultli = $('<li class="tip noresultli">无匹配结果</li>');
                 ul_list.prepend($noresultli);
@@ -282,6 +296,7 @@
         } else {
             ul_list.children('li').show();
             ul_list.children('.noresultli.tip').remove();//删除提示
+            ul_list.parent('.select_box').data('cselect-debug') ? console.info('筛选li') : '';
         }
         ul_list.children('li').css('padding-right', ul_list[0].offsetWidth - ul_list[0].scrollWidth);//滚动条留白
     }
@@ -301,6 +316,15 @@
         }
         ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').parent().children('li:visible').eq(seldefaultindex).addClass('selected');
     }
+
+    /**
+     * 解决ie8 console 报错
+     */
+    window.console = window.console || (function(){
+            var c = {}; c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile
+                = c.clear = c.exception = c.trace = c.assert = function(){};
+            return c;
+        })();
 
     $.fn.cselectCss = function (options) {
         var defaluts = { //默认配置
