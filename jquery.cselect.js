@@ -27,7 +27,7 @@
         //创建select容器，class为select_box，插入到select标签前
         var tag_select = $('<div></div>');//div相当于select标签
         tag_select.attr('class', 'select_box  ' + singleClassName);
-        tag_select.data('cselect-show', true).insertBefore(select_container);
+        tag_select.data({'cselect-show': true, 'cselect-debug': options.debug}).insertBefore(select_container);
 
 
         //显示框class为select_showbox,插入到创建的tag_select中
@@ -60,13 +60,13 @@
             if ($(this).data('select-enable')) {
                 if (!options.autocomplete) {
                     clearOptionMethod(select_showbox, ul_option);
-                    console.info("这是click");
+                    $(this).data('cselect-debug') ? console.info("这是click") : '';
                 }
             }
         }).on('blur', function () {
             if (options.autocomplete) {
                 select_showbox.css('color', select_showbox.data('filter-text-color'));
-                console.info('showbox 失去焦点');
+                $(this).data('cselect-debug') ? console.info('showbox 失去焦点') : '';
             }
         });
         //阻止事件进一步的冒泡到上一层
@@ -74,17 +74,14 @@
             e.stopPropagation();
         }).hover(function () {
             ul_option.data('filter-ul-open', true);
-            console.info('ul进入了');
+            $(this).parent('.select_box').data('cselect-debug') ? console.info('ul进入了') : '';
         }, function () {
-
-            select_showbox.css('color', select_showbox.data('filter-text-color'));
-
+            //select_showbox.css('color', select_showbox.data('filter-text-color'));
             ul_option.data('filter-ul-open', false);
-            console.info('ul离开了');
+            $(this).parent('.select_box').data('cselect-debug') ? console.info('ul离开了') : '';
         });
         var li_option = ul_option.find('li').not('.tip');
-        li_option.on('click', function (e) {
-            //e.stopPropagation();
+        li_option.on('click', function () {
             $(this).addClass('selected').siblings().removeClass('selected');
             var wenben = $(this).text();
             var index = $(this).index();
@@ -92,7 +89,7 @@
             var value = _select.find('option').eq(index).attr('value');
             _select.val(value);
             select_showbox.text(wenben).removeClass('active');
-            console.info("这是li点击");
+            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("这是li点击") : '';
             ul_option.hide().data('filter-ul-open', false);
             /*重新运行onchange事件*/
             if (document.all) {
@@ -104,10 +101,10 @@
             }
         }).hover(function () {
             $(this).addClass('hover').siblings().removeClass('hover');
-            console.info("这是li得到焦点");
+            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("这是li得到焦点") : '';
         }, function () {
             li_option.removeClass('hover');
-            console.info("这是li失去焦点");
+            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("这是li失去焦点") : '';
         });
 
         $(document).bind("keyup", function (e) {//添加按下esc收起下拉列表
@@ -119,21 +116,12 @@
             } else if (keyCode == 40) { //下移操作
                 if (ul_option.css("display") != 'none') {
                     var seldefaultindex = ul_option.data('seldefaultindex');
-                    if (seldefaultindex < ul_option.children('li').length - 1) {
+                    if (seldefaultindex < ul_option.children('li:visible').length - 1) {
                         seldefaultindex = seldefaultindex + 1;
                     } else {
-                        seldefaultindex = ul_option.children('li').length - 1;
+                        seldefaultindex = ul_option.children('li:visible').length - 1;
                     }
-                    if (seldefaultindex == 0) {
-                        ul_option.scrollTop(0);
-                    } else {
-                        var liheight = seldefaultindex * ul_option.children('li').eq(0).outerHeight();
-                        var offsetTopHeight = liheight - ul_option.scrollTop();
-                        if (offsetTopHeight > ul_option.outerHeight() || offsetTopHeight < 0) {
-                            ul_option.scrollTop(liheight);
-                        }
-                    }
-                    ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').eq(seldefaultindex).addClass('selected');
+                    updownselect(seldefaultindex, ul_option);
                 }
             } else if (keyCode == 38) { //上移操作
                 if (ul_option.css("display") != 'none') {
@@ -143,23 +131,14 @@
                     } else {
                         seldefaultindex = 0;
                     }
-                    if (seldefaultindex == 0) {
-                        ul_option.scrollTop(0);
-                    } else {
-                        var liheight = seldefaultindex * ul_option.children('li').eq(0).outerHeight();
-                        var offsetTopHeight = liheight - ul_option.scrollTop();
-                        if (offsetTopHeight > ul_option.outerHeight() || offsetTopHeight < 0) {
-                            ul_option.scrollTop(liheight);
-                        }
-                    }
-                    ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').eq(seldefaultindex).addClass('selected');
+                    updownselect(seldefaultindex, ul_option);
                 }
             } else if (keyCode == 13) { //回车操作
                 if (ul_option.css("display") != 'none') {
-                    ul_option.children('li.selected').click();
+                    ul_option.children('li:visible.selected').click();
                     if (options.autocomplete) {
                         ul_option.prev().prev('input').data('enter-operation', true);
-                        console.info('enter-operation', ul_option.prev().prev('input').data('enter-operation'));
+                        ul_option.parent('.select_box').data('cselect-debug') ? console.info('enter-operation', ul_option.prev().prev('input').data('enter-operation')) : '';
                         ul_option.prev().prev('input').blur();
                     }
                 }
@@ -220,7 +199,7 @@
                 'background': 'transparent',
                 'line-height': searchheight + 'px'
             }).insertBefore(ul_list).bind('input propertychange', function () {
-                console.info("这是输入中");
+                $(this).parent('.select_box').data('cselect-debug') ? console.info("这是输入中") : '';
                 if ($(this).val() != '') {
                     select_showbox.css('color', 'transparent');
                     var searchval = $(this).val();
@@ -230,24 +209,25 @@
                 }
             }).on('blur', function () {
                 $(this).val('');
+                select_showbox.css('color', select_showbox.data('filter-text-color'));
                 if (!$(this).data('enter-operation')) {
                     if (!ul_list.data('filter-ul-open')) {
                         clearOptionMethod(select_showbox, ul_list);
                         filterdo(ul_list);
                         $downci.data('down-ci-show', false);
-                        select_showbox.css('color', select_showbox.data('filter-text-color'));
                     }
                 } else {
                     $(this).data('enter-operation', false);
                 }
-                console.info("这是input 失去焦点");
+
+                $(this).parent('.select_box').data('cselect-debug') ? console.info("这是input 失去焦点") : '';
             }).on('focus', function () {
                 //ul_list.show();
                 clearOptionMethod(select_showbox, ul_list);
                 if (!ul_list.data('filter-ul-open')) {
                     filterdo(ul_list);
                 }
-                console.info("这是input focus");
+                $(this).parent('.select_box').data('cselect-debug') ? console.info("这是input focus") : '';
             });
             var $downci = $('<i></i>');//右边小箭头控制显示与否
             $downci.width(searchright).height(searchheight).data('down-ci-show', true).css({
@@ -289,8 +269,8 @@
                 }
             });
             ul_list.data('selindexArr', selindexArr);
-            console.info('结算结果为' + i);
-            console.info('ul_list长度为' + ulLength);
+            ul_list.parent('.select_box').data('cselect-debug') ? console.info('结算结果为' + i) : '';
+            ul_list.parent('.select_box').data('cselect-debug') ? console.info('ul_list长度为' + ulLength) : '';
             if (ulLength == i) {
                 var $noresultli = $('<li class="tip noresultli">无匹配结果</li>');
                 ul_list.prepend($noresultli);
@@ -306,12 +286,29 @@
         ul_list.children('li').css('padding-right', ul_list[0].offsetWidth - ul_list[0].scrollWidth);//滚动条留白
     }
 
+    /*
+     上下移动操作
+     */
+    function updownselect(seldefaultindex, ul_option) {
+        if (seldefaultindex == 0) {
+            ul_option.scrollTop(0);
+        } else {
+            var liheight = seldefaultindex * ul_option.children('li:visible').eq(0).outerHeight();
+            var offsetTopHeight = liheight - ul_option.scrollTop();
+            if (offsetTopHeight > ul_option.outerHeight() || offsetTopHeight < 0) {
+                ul_option.scrollTop(liheight);
+            }
+        }
+        ul_option.data('seldefaultindex', seldefaultindex).children('li').removeClass('selected').parent().children('li:visible').eq(seldefaultindex).addClass('selected');
+    }
+
     $.fn.cselectCss = function (options) {
         var defaluts = { //默认配置
             cminwidth: 0,
             cmaxwidth: 0,
             cfixwidth: 0,
             autocomplete: false,
+            debug: false,
             $search: {
                 widthp: 1,
                 heightp: 1
