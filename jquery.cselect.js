@@ -40,7 +40,7 @@
             select_showbox.width(options.cfixwidth)
         }
         select_showbox.data('cselect-show', true).css('cursor', 'pointer').attr('class', 'select_showbox').appendTo(tag_select);
-        select_showbox.data('filter-text-color', select_showbox.css('color'));
+        select_showbox.data('filter-text-size', select_showbox.css('font-size'));
 
         //创建option容器，class为select_option，插入到创建的tag_select中
         var ul_option = $('<ul></ul>');//创建option列表
@@ -65,7 +65,7 @@
             }
         }).on('blur', function () {
             if (options.autocomplete) {
-                select_showbox.css('color', select_showbox.data('filter-text-color'));
+                select_showbox.css('font-size', select_showbox.data('filter-text-size'));
                 $(this).data('cselect-debug') ? console.info('showbox 失去焦点') : '';
             }
         });
@@ -82,7 +82,7 @@
         });
         var li_option = ul_option.find('li').not('.tip');
         li_option.on('click', function () {
-            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("jjjjj") : '';
+            $(this).parent().parent('.select_box').data('cselect-debug') ? console.info("li click 加载进去初期") : '';
             $(this).addClass('selected').siblings().removeClass('selected');
             var wenben = $(this).text();
             var index = $(this).index();
@@ -179,14 +179,14 @@
     }
 
     function searchFilter(ul_list, select_showbox, parameters) {//创建搜索过滤input
+        var boxwidth = parseInt(select_showbox.outerWidth()),
+            boxheight = parseInt(select_showbox.outerHeight()),
+            searchwidth = parseInt(boxwidth * (parameters.$search.widthp)),
+            searchheight = parseInt(boxheight * (parameters.$search.heightp)),
+            searchleft = parseInt(select_showbox.css('padding-left')),
+            searchright = parseInt(select_showbox.css('padding-right'));
         if (parameters.autocomplete) {
-            var boxwidth = parseInt(select_showbox.outerWidth()),
-                boxheight = parseInt(select_showbox.outerHeight()),
-                searchwidth = parseInt(boxwidth * (parameters.$search.widthp)),
-                searchheight = parseInt(boxheight * (parameters.$search.heightp)),
-                searchleft = parseInt(select_showbox.css('padding-left')),
-                searchright = parseInt(select_showbox.css('padding-right'));
-            $searchinput = $('<input class="searchinput" type="text"/>');
+            var $searchinput = $('<input class="searchinput" type="text"/>');
             $searchinput.data({
                 'cselect-show': true
             }).width(searchwidth - searchright).height(searchheight).css({
@@ -200,30 +200,30 @@
                 'background': 'transparent',
                 'line-height': searchheight + 'px'
             }).insertBefore(ul_list).bind('input propertychange', function () {
-                if(navigator.userAgent.indexOf("MSIE 8.0")>0){
-                    if(!$(this).data('cselect-ie8-blur')){
+                if (navigator.userAgent.indexOf("MSIE 8.0") > 0) {
+                    if (!$(this).data('cselect-ie8-blur')) {
                         $(this).parent('.select_box').data('cselect-debug') ? console.info("这是ie8输入中") : '';
-                        select_showbox.css('color', 'transparent');
+                        select_showbox.css('font-size', '0');
                         var searchval = $(this).val();
                         filterdo(ul_list, searchval);
-                    }else{
-                        $(this).data('cselect-ie8-blur',false);
+                    } else {
+                        $(this).data('cselect-ie8-blur', false);
                     }
-                }else{
+                } else {
                     $(this).parent('.select_box').data('cselect-debug') ? console.info("这是输入中") : '';
-                    select_showbox.css('color', 'transparent');
+                    select_showbox.css('font-size', '0');
                     var searchval = $(this).val();
                     filterdo(ul_list, searchval);
                 }
             }).on('blur', function () {
 
-                if(navigator.userAgent.indexOf("MSIE 8.0")>0){
-                    $(this).parent('.select_box').data('cselect-debug') ?console.info("ie8 input 离开"):'';
-                    $(this).data('cselect-ie8-blur',true).val('');
-                }else{
+                if (navigator.userAgent.indexOf("MSIE 8.0") > 0) {
+                    $(this).parent('.select_box').data('cselect-debug') ? console.info("ie8 input 离开") : '';
+                    $(this).data('cselect-ie8-blur', true).val('');
+                } else {
                     $(this).val('');
                 }
-                select_showbox.css('color', select_showbox.data('filter-text-color'));
+                select_showbox.css('font-size', select_showbox.data('filter-text-size'));
                 if (!$(this).data('enter-operation')) {
                     if (!ul_list.data('filter-ul-open')) {
                         clearOptionMethod(select_showbox, ul_list);
@@ -243,19 +243,21 @@
                 }
                 $(this).parent('.select_box').data('cselect-debug') ? console.info("这是input focus") : '';
             });
-            var $downci = $('<i></i>');//右边小箭头控制显示与否
-            $downci.width(searchright).height(searchheight).data('down-ci-show', true).css({
-                'box-sizing': 'border-box',
-                'position': 'absolute',
-                'right': 0,
-                'top': 0,
-                'border': 'none',
-                'outline': 'none',
-                'background': 'transparent',
-                'line-height': searchheight + 'px',
-                'cursor': 'pointer'
-            }).insertBefore(ul_list).on('click', function (e) {
-                e.stopPropagation();
+        }
+        var $downci = $('<i class="dropdown icon"></i>');//右边小箭头控制显示与否
+        $downci.width(searchright).height(searchheight).data('down-ci-show', true).css({
+            'box-sizing': 'border-box',
+            'position': 'absolute',
+            'right': 0,
+            'top': 0,
+            'border': 'none',
+            'outline': 'none',
+            //'background': 'transparent',
+            'line-height': searchheight + 'px',
+            'cursor': 'pointer'
+        }).insertBefore(ul_list).on('click', function (e) {
+            e.stopPropagation();
+            if (parameters.autocomplete) {
                 if (!ul_list.is('visible')) {
                     if ($downci.data('down-ci-show')) {
                         $searchinput.focus();
@@ -263,14 +265,16 @@
                         $downci.data('down-ci-show', true);
                     }
                 }
-            });
-        }
+            } else {
+                select_showbox.parent('div').click();
+            }
+        });
     }
 
     function filterdo(ul_list) {//执行关键词检索
         var inputval = ul_list.prev().prev('input').val();
         if (inputval) {
-               var ulLength = ul_list.children('li').length,
+            var ulLength = ul_list.children('li').length,
                 i = 0;
             var selindexArr = [];
             arguments[0].children('li').each(function (index) {
@@ -320,9 +324,11 @@
     /**
      * 解决ie8 console 报错
      */
-    window.console = window.console || (function(){
-            var c = {}; c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile
-                = c.clear = c.exception = c.trace = c.assert = function(){};
+    window.console = window.console || (function () {
+            var c = {};
+            c.log = c.warn = c.debug = c.info = c.error = c.time = c.dir = c.profile
+                = c.clear = c.exception = c.trace = c.assert = function () {
+            };
             return c;
         })();
 

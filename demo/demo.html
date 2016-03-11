@@ -17,7 +17,6 @@
         var bObj = document.getElementById("test2");
         function addchange() {
 //            jquery方法
-            $('#test2').cselectCss();
             $('#test2').change(function () {
                 alert("The option you select is:" + $(this).children('option:selected').val());
             });
