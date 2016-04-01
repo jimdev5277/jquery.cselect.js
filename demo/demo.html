@@ -27,12 +27,17 @@
 //                bObj.attachEvent("onchange",mychange);
 //            }
         }
+        function changeop() {
+            var date = new Date();
+            $('#test3').children('option').eq(0).text(date);
+        }
         $(document).ready(function () {
             $('#test').cselectCss({
                 autocomplete: true,
                 debug: true
             });
             $('#test2').cselectCss({debug: true});
+            $('#test3').cselectCss({detection: true});
         });
     </script>
 </head>
@@ -67,5 +72,17 @@
     <br>
     <button onclick="addchange()">写入onchange事件</button>
 </div>
+<div class="singlerow-select">
+    <h3>修改select的值 让js自动修改适应</h3>
+    <select name="test3" id="test3" cselect-fixwidth="300" onchange="showMsg(this)">
+        <option value="time1">时间1</option>
+        <option value="time2">时间2</option>
+    </select>
+    <br>
+    <br>
+    <button onclick="changeop()">修改test3op的值</button>
+</div>
+<br>
+<br>
 </body>
 </html>

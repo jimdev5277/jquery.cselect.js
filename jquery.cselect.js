@@ -331,6 +331,23 @@
             };
             return c;
         })();
+    /**
+     * 检查select是否修改值
+     */
+    function setOptionTarget(ele) {
+        var $ele = ele instanceof jQuery ? ele : $(ele);
+        if (!$ele.data('optionTarget-text')) {
+            $ele.data('optionTarget-text', $ele.html());
+            return true;
+        } else {
+            if ($ele.data('optionTarget-text') == $ele.html()) {
+                return true;
+            } else {
+                $ele.data('optionTarget-text', $ele.html());
+                return false;
+            }
+        }
+    }
 
     $.fn.cselectCss = function (options) {
         var defaluts = { //默认配置
@@ -343,7 +360,8 @@
                 widthp: 1,
                 heightp: 1
             },
-            maxheight: 300
+            maxheight: 300,
+            detection: false
         };
         var setting = $.extend(defaluts, options);
         return $(this).each(function (i, ele) {
@@ -354,6 +372,15 @@
             setting2.cmaxwidth = $(this).attr('cselect-maxwidth') == undefined ? setting.cmaxwidth : parseInt($(this).attr('cselect-maxwidth'));
             setting2.cfixwidth = $(this).attr('cselect-fixwidth') == undefined ? setting.cfixwidth : parseInt($(this).attr('cselect-fixwidth'));
             createSelect_cSelect(ele, singleClassName, setting2);
+            var setAutoDetect = function () {
+                if (!setOptionTarget(ele)) {
+                    $(ele).prev('.select_box').remove();
+                    createSelect_cSelect(ele, singleClassName, setting2);
+                    setting2.debug ? console.info('某个select的值已经修改') : '';
+                }
+                setTimeout(setAutoDetect, 1000);
+            };
+            setting2.detection ? setAutoDetect() : '';//自动检测select的值修改
         });
     };
 }(jQuery));
