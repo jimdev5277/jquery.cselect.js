@@ -336,11 +336,13 @@
      */
     function setOptionTarget(ele) {
         var $ele = ele instanceof jQuery ? ele : $(ele);
+        var fakeText = $ele.prev('.select_box').children('.select_showbox').text();
+        var realText = $ele.find("option:selected").text();
         if (!$ele.data('optionTarget-text')) {
             $ele.data('optionTarget-text', $ele.html());
             return true;
         } else {
-            if ($ele.data('optionTarget-text') == $ele.html()) {
+            if ($ele.data('optionTarget-text') == $ele.html() && fakeText == realText) {
                 return true;
             } else {
                 $ele.data('optionTarget-text', $ele.html());
